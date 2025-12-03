@@ -1,125 +1,193 @@
-| Supported Targets | ESP32 | ESP32-C2 | ESP32-C3 | ESP32-C5 | ESP32-C6 | ESP32-C61 | ESP32-S2 | ESP32-S3 | ESP32-P4 | ESP32-H2 |
-| ----------------- | ----- | -------- | -------- | -------- | --------- | -------- | -------- | -------- | -------- | -------- |
 
-# Wi-Fi Station Example
+# 📘 Projeto ESP32 – Controle de LED e Botão via MQTT
 
-(See the README.md file in the upper level 'examples' directory for more information about examples.)
+## **Alunos**: Daniel Luiz, Kauan Cavalcante e Pedro Lucas Lima
 
-This example shows how to use the Wi-Fi Station functionality of the Wi-Fi driver of ESP for connecting to an Access Point.
+Este projeto utiliza o ESP32, conectado ao Wi-Fi no modo station, para realizar duas funções principais:
 
-## How to use example
+1. Enviar via MQTT o estado de um botão físico (pressionado/solto).
 
-### Configure the project
+1. Receber comandos MQTT para ligar ou desligar um LED conectado ao pino configurado.
 
-Open the project configuration menu (`idf.py menuconfig`).
+A comunicação é feita através do broker público HiveMQ, permitindo que o dispositivo seja controlado por outro ESP32, por um aplicativo MQTT ou pelo MQTT Explorer.
 
-In the `Example Configuration` menu:
+## 🗂 Funcionalidades do projeto
 
-* Set the Wi-Fi configuration.
-    * Set `WiFi SSID`.
-    * Set `WiFi Password`.
+### ✔ Publicação MQTT (ESP → Broker)
 
-Optional: If you need, change the other options according to your requirements.
+Sempre que o botão muda de estado:
 
-### Build and Flash
+- Botão pressionado → publica "1"
 
-Build the project and flash it to the board, then run the monitor tool to view the serial output:
+- Botão solto → publica "0"
 
-Run `idf.py -p PORT flash monitor` to build, flash and monitor the project.
-
-(To exit the serial monitor, type ``Ctrl-]``.)
-
-See the Getting Started Guide for all the steps to configure and use the ESP-IDF to build projects.
-
-* [ESP-IDF Getting Started Guide on ESP32](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/index.html)
-* [ESP-IDF Getting Started Guide on ESP32-S2](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/get-started/index.html)
-* [ESP-IDF Getting Started Guide on ESP32-C3](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/get-started/index.html)
-
-## Example Output
-Note that the output, in particular the order of the output, may vary depending on the environment.
-
-Console output if station connects to AP successfully:
+A publicação é feita no tópico:
 ```
-I (589) wifi station: ESP_WIFI_MODE_STA
-I (599) wifi: wifi driver task: 3ffc08b4, prio:23, stack:3584, core=0
-I (599) system_api: Base MAC address is not set, read default base MAC address from BLK0 of EFUSE
-I (599) system_api: Base MAC address is not set, read default base MAC address from BLK0 of EFUSE
-I (629) wifi: wifi firmware version: 2d94f02
-I (629) wifi: config NVS flash: enabled
-I (629) wifi: config nano formatting: disabled
-I (629) wifi: Init dynamic tx buffer num: 32
-I (629) wifi: Init data frame dynamic rx buffer num: 32
-I (639) wifi: Init management frame dynamic rx buffer num: 32
-I (639) wifi: Init management short buffer num: 32
-I (649) wifi: Init static rx buffer size: 1600
-I (649) wifi: Init static rx buffer num: 10
-I (659) wifi: Init dynamic rx buffer num: 32
-I (759) phy: phy_version: 4180, cb3948e, Sep 12 2019, 16:39:13, 0, 0
-I (769) wifi: mode : sta (30:ae:a4:d9:bc:c4)
-I (769) wifi station: wifi_init_sta finished.
-I (889) wifi: new:<6,0>, old:<1,0>, ap:<255,255>, sta:<6,0>, prof:1
-I (889) wifi: state: init -> auth (b0)
-I (899) wifi: state: auth -> assoc (0)
-I (909) wifi: state: assoc -> run (10)
-I (939) wifi: connected with #!/bin/test, aid = 1, channel 6, BW20, bssid = ac:9e:17:7e:31:40
-I (939) wifi: security type: 3, phy: bgn, rssi: -68
-I (949) wifi: pm start, type: 1
-
-I (1029) wifi: AP's beacon interval = 102400 us, DTIM period = 3
-I (2089) esp_netif_handlers: sta ip: 192.168.77.89, mask: 255.255.255.0, gw: 192.168.77.1
-I (2089) wifi station: got ip:192.168.77.89
-I (2089) wifi station: connected to ap SSID:myssid password:mypassword
+embarcados/espAligaLedB
 ```
 
-Console output if the station failed to connect to AP:
+### ✔ Assinatura MQTT (Broker → ESP)
+
+O ESP32 se inscreve no tópico:
+
 ```
-I (589) wifi station: ESP_WIFI_MODE_STA
-I (599) wifi: wifi driver task: 3ffc08b4, prio:23, stack:3584, core=0
-I (599) system_api: Base MAC address is not set, read default base MAC address from BLK0 of EFUSE
-I (599) system_api: Base MAC address is not set, read default base MAC address from BLK0 of EFUSE
-I (629) wifi: wifi firmware version: 2d94f02
-I (629) wifi: config NVS flash: enabled
-I (629) wifi: config nano formatting: disabled
-I (629) wifi: Init dynamic tx buffer num: 32
-I (629) wifi: Init data frame dynamic rx buffer num: 32
-I (639) wifi: Init management frame dynamic rx buffer num: 32
-I (639) wifi: Init management short buffer num: 32
-I (649) wifi: Init static rx buffer size: 1600
-I (649) wifi: Init static rx buffer num: 10
-I (659) wifi: Init dynamic rx buffer num: 32
-I (759) phy: phy_version: 4180, cb3948e, Sep 12 2019, 16:39:13, 0, 0
-I (759) wifi: mode : sta (30:ae:a4:d9:bc:c4)
-I (769) wifi station: wifi_init_sta finished.
-I (889) wifi: new:<6,0>, old:<1,0>, ap:<255,255>, sta:<6,0>, prof:1
-I (889) wifi: state: init -> auth (b0)
-I (1889) wifi: state: auth -> init (200)
-I (1889) wifi: new:<6,0>, old:<6,0>, ap:<255,255>, sta:<6,0>, prof:1
-I (1889) wifi station: retry to connect to the AP
-I (1899) wifi station: connect to the AP fail
-I (3949) wifi station: retry to connect to the AP
-I (3949) wifi station: connect to the AP fail
-I (4069) wifi: new:<6,0>, old:<6,0>, ap:<255,255>, sta:<6,0>, prof:1
-I (4069) wifi: state: init -> auth (b0)
-I (5069) wifi: state: auth -> init (200)
-I (5069) wifi: new:<6,0>, old:<6,0>, ap:<255,255>, sta:<6,0>, prof:1
-I (5069) wifi station: retry to connect to the AP
-I (5069) wifi station: connect to the AP fail
-I (7129) wifi station: retry to connect to the AP
-I (7129) wifi station: connect to the AP fail
-I (7249) wifi: new:<6,0>, old:<6,0>, ap:<255,255>, sta:<6,0>, prof:1
-I (7249) wifi: state: init -> auth (b0)
-I (8249) wifi: state: auth -> init (200)
-I (8249) wifi: new:<6,0>, old:<6,0>, ap:<255,255>, sta:<6,0>, prof:1
-I (8249) wifi station: retry to connect to the AP
-I (8249) wifi station: connect to the AP fail
-I (10299) wifi station: connect to the AP fail
-I (10299) wifi station: Failed to connect to SSID:myssid, password:mypassword
+embarcados/espAligaLedB
+```
+E executa:
+
+- "1" → Liga o LED
+
+- "0" → Desliga o LED
+
+## ✔ LED local
+O LED também pode ser acionado via tópico MQTT remoto, permitindo usar:
+
+- Outro ESP32
+
+- Aplicativo MQTT
+
+- MQTT Explorer
+
+## 🔌 Ligações elétricas
+
+| Componente | Pino ESP32                           |
+| ---------- | ------------------------------------ |
+| LED        | GPIO 21                              |
+| Botão      | GPIO 23 (Pull-up interno habilitado) |
+
+O botão deve conectar **GPIO23** → **GND** ao ser pressionado.
+
+## 📡 Configuração Wi-Fi
+
+No código, defina SSID e senha:
+
+```
+#define ESP_WIFI_SSID      "iPhone"
+#define ESP_WIFI_PASS      "123456789"
 ```
 
-## Running the example on ESP Chips without Wi-Fi
+## 🌐 Broker MQTT
 
-This example can run on ESP Chips without Wi-Fi using ESP-Hosted. See the [Two-Chip Solution](../../README.md#wi-fi-examples-with-two-chip-solution) section in the upper level `README.md` for information.
+O projeto usa o broker público:
 
-## Troubleshooting
+```
+mqtt://broker.hivemq.com
+Porta: 1883
+```
 
-For any technical queries, please open an [issue](https://github.com/espressif/esp-idf/issues) on GitHub. We will get back to you soon.
+Este broker não requer autenticação, ideal para testes.
+
+## ⚙ Tópicos MQTT usados
+
+| Função                  | Tópico                | Direção      |
+| ----------------------- | --------------------- | ------------ |
+| Publica estado do botão | `embarcados/espAligaLedB` | ESP → Broker |
+| Recebe comando para LED | `embarcados/espAligaLedB`  | Broker → ESP |
+
+
+Você pode visualizar tudo pelo MQTT Explorer.
+
+## 🧠 Como o código funciona
+### ▶ Inicialização
+
+- Inicializa NVS
+
+- Conecta ao Wi-Fi como station
+
+- Ao obter IP, ativa o MQTT
+
+- Cria a task do botão
+
+### ▶ Task `button_led_task`
+
+Executa continuamente:
+
+- Lê o GPIO do botão
+
+- Detecta mudança de estado
+
+- Publica no tópico `embarcados/espAligaLedB`
+
+- Registra no console
+
+### ▶ MQTT Event Handler
+
+Quando receber dados:
+```
+embarcados/espAligaLedB → "1" → liga LED  
+embarcados/espAligaLedB → "0" → desliga LED
+```
+
+## 🧪 Testando com MQTT Explorer
+### 1️⃣ Publicar comando para ligar o LED
+- Tópico: ```embarcados/espAligaLedB```
+
+- Mensagem: 1
+
+LED acende na hora.
+
+### 2️⃣ Desligar
+
+- Mensagem: 0
+
+### 3️⃣ Receber estado do botão
+Assine:
+```
+embarcados/espAligaLedB
+```
+
+Você verá:
+```
+1  (botão pressionado)
+0  (botão solto)
+```
+
+## 🤝 Usando com 2 ESP32
+
+### ESP A (com botão)
+- Publica em ```embarcados/espAligaLedB```
+### ESP B (com LED)
+- Inscreve em ```embarcados/espAligaLedB```
+- Liga/desliga LED baseado no valor
+
+Você só precisa trocar no ESP B:
+```
+esp_mqtt_client_subscribe(client, "embarcados/espAligaLedB", 0);
+```
+
+E no tratamento:
+```
+if(event->data[0] == '1') gpio_set_level(LED_PIN, 1);
+else gpio_set_level(LED_PIN, 0);
+```
+
+Nenhum ESP precisa criar tópico — os tópicos nascem ao serem publicados no broker.
+
+### ▶ Como compilar e enviar
+
+1. Conectar ESP32 via USB
+2. Na pasta do projeto:
+
+```
+idf.py set-target esp32
+idf.py build
+idf.py flash
+idf.py monitor
+```
+
+### 📝 Requisitos para rodar
+
+- ESP-IDF 5.x instalado
+
+- Python e ambiente configurado
+
+- Driver CP2102/CH340 instalado (dependendo do ESP32)
+
+- Acesso a rede Wi-Fi 2.4 GHz
+
+
+
+
+
+README.md
+4 KB
