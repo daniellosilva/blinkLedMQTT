@@ -1,0 +1,73 @@
+============================
+Build e artefatos temporários
+============================
+build/
+sdkconfig.old
+CMakeFiles/
+CMakeCache.txt
+*.cmake
+
+Logs e arquivos temporários
+*.log
+*.tmp
+
+Arquivos gerados pelo IDF
+dependencies.lock
+idf.env
+project_description.json
+
+Diretório de exportação do IDF
+export/
+
+Arquivos de configuração do VSCode
+.vscode/
+exceto se quiser versionar especificamente
+.vscode/settings.json
+.vscode/extensions.json
+Ambiente Python criado pelo IDF
+*.pyc
+pycache/
+.espressif/
+python_env/
+
+Certificados, chaves privadas e senhas
+*.pem
+*.key
+*.crt
+
+Dumps / cores
+*.elf
+*.bin
+*.map
+*.dump
+
+============================
+Sistema operacional
+============================
+Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+Linux
+*~
+
+============================
+Ferramentas e IDEs
+============================
+CLion / JetBrains
+.idea/
+
+Eclipse
+*.project
+*.cproject
+
+Backup de editores
+*~
+*.swp
+*.swo
